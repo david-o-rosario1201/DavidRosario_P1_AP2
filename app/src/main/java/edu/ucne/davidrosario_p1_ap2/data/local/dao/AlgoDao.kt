@@ -1,11 +1,13 @@
 package edu.ucne.davidrosario_p1_ap2.data.local.dao
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import edu.ucne.davidrosario_p1_ap2.data.local.AlgoEntity
+import edu.ucne.davidrosario_p1_ap2.data.local.entities.AlgoEntity
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface AlgoDao {
     @Upsert
     suspend fun save(Algo: AlgoEntity)
