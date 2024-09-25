@@ -1,6 +1,6 @@
 package edu.ucne.davidrosario_p1_ap2.data.repository
 
-import edu.ucne.davidrosario_p1_ap2.data.local.AlgoEntity
+import edu.ucne.davidrosario_p1_ap2.data.local.entities.AlgoEntity
 import edu.ucne.davidrosario_p1_ap2.data.local.dao.AlgoDao
 import javax.inject.Inject
 
