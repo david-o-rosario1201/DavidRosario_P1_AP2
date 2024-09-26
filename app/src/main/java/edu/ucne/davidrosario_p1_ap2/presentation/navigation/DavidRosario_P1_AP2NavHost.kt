@@ -9,6 +9,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import edu.ucne.davidrosario_p1_ap2.presentation.venta.VentaListScreen
+import edu.ucne.davidrosario_p1_ap2.presentation.venta.VentaScreen
 import edu.ucne.davidrosario_p1_ap2.ui.theme.DavidRosario_P1_AP2Theme
 
 @Composable
@@ -16,24 +19,26 @@ fun DavidRosario_P1_AP2NavHost(
     navHostController: NavHostController
 ){
     NavHost(
-        startDestination = Screen.ListScreen,
+        startDestination = Screen.VentaListScreen,
         navController = navHostController
     ) {
-        composable<Screen.ListScreen> {
-            Button(
-                onClick = {
-                    navHostController.navigate(Screen.RegistroScreen(0))
+        composable<Screen.VentaListScreen> {
+            VentaListScreen(
+                onVentaClick = { ventaId ->
+                    navHostController.navigate(Screen.VentaScreen(ventaId))
+                },
+                onVentaAdd = {
+                    navHostController.navigate(Screen.VentaScreen(0))
                 }
-            ) {
-                Text(
-                    text = "Ir a la segunda pantalla"
-                )
-            }
+            )
         }
-        composable<Screen.RegistroScreen> {
-
-            Text(
-                text = "Estas en la segunda pantalla"
+        composable<Screen.VentaScreen> { argumentos ->
+            val id= argumentos.toRoute<Screen.VentaScreen>().ventaId
+            VentaScreen(
+                ventaId = id,
+                goVentaList = {
+                    navHostController.navigate(Screen.VentaListScreen)
+                }
             )
         }
     }
