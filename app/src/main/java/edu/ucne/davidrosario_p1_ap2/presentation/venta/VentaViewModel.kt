@@ -48,14 +48,25 @@ class VentaViewModel @Inject constructor(
                 }
             }
             is VentaUiEvent.galonesChanged -> {
-                if(!_uiState.value.galones.isNullOrEmpty() && !_uiState.value.precio.isNullOrEmpty() && !_uiState.value.descuentoGalon.isNullOrEmpty()){
-                    val totalDescontado = _uiState.value.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
-                    val total = (_uiState.value.galones.toDouble() * _uiState.value.precio.toDouble()) - totalDescontado
+                if(_uiState.value.precio.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty() && event.galones.isNotEmpty()){
+                    val totalDescontado = event.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
+                    val total = (event.galones.toDouble() * _uiState.value.precio.toDouble()) - totalDescontado
                     _uiState.update {
                         it.copy(
-                            galones = event.galones.toString(),
+                            galones = event.galones,
                             totalDescontado = totalDescontado.toString(),
                             total = total.toString(),
+                            errorGalones = ""
+                        )
+                    }
+                }
+                else if(_uiState.value.descuentoGalon.isNotEmpty() && event.galones.isNotEmpty()){
+                    val totalDescontado = event.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
+                    _uiState.update {
+                        it.copy(
+                            galones = event.galones,
+                            totalDescontado = totalDescontado.toString(),
+                            total = "0.0",
                             errorGalones = ""
                         )
                     }
@@ -63,7 +74,7 @@ class VentaViewModel @Inject constructor(
                 else{
                     _uiState.update {
                         it.copy(
-                            galones = event.galones.toString(),
+                            galones = event.galones,
                             totalDescontado = "0.0",
                             total = "0.0",
                             errorGalones = ""
@@ -72,14 +83,25 @@ class VentaViewModel @Inject constructor(
                 }
             }
             is VentaUiEvent.descuentoGalonChanged -> {
-                if(!_uiState.value.galones.isNullOrEmpty() && !_uiState.value.precio.isNullOrEmpty() && !_uiState.value.descuentoGalon.isNullOrEmpty()){
-                    val totalDescontado = _uiState.value.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
+                if(_uiState.value.galones.isNotEmpty() && _uiState.value.precio.isNotEmpty() && event.descuentoGalon.isNotEmpty()){
+                    val totalDescontado = _uiState.value.galones.toDouble() * event.descuentoGalon.toDouble()
                     val total = (_uiState.value.galones.toDouble() * _uiState.value.precio.toDouble()) - totalDescontado
                     _uiState.update {
                         it.copy(
-                            descuentoGalon = event.descuentoGalon.toString(),
+                            descuentoGalon = event.descuentoGalon,
                             totalDescontado = totalDescontado.toString(),
                             total = total.toString(),
+                            errorDescuentoGalon = ""
+                        )
+                    }
+                }
+                else if(_uiState.value.galones.isNotEmpty() && event.descuentoGalon.isNotEmpty()){
+                    val totalDescontado = _uiState.value.galones.toDouble() * event.descuentoGalon.toDouble()
+                    _uiState.update {
+                        it.copy(
+                            descuentoGalon = event.descuentoGalon,
+                            totalDescontado = totalDescontado.toString(),
+                            total = "0.0",
                             errorDescuentoGalon = ""
                         )
                     }
@@ -87,8 +109,8 @@ class VentaViewModel @Inject constructor(
                 else{
                     _uiState.update {
                         it.copy(
-                            descuentoGalon = event.descuentoGalon.toString(),
-                            totalDescontado = "0.0",
+                            descuentoGalon = event.descuentoGalon,
+                            totalDescontado = event.descuentoGalon,
                             total = "0.0",
                             errorDescuentoGalon = ""
                         )
@@ -110,19 +132,35 @@ class VentaViewModel @Inject constructor(
 //                    }
 //                }
 
-                val galon = _uiState?.value?.galones?.toDouble() ?: 0.0
-                val descuentoGalon = _uiState?.value?.descuentoGalon?.toDouble() ?: 0.0
-                val precio = event.precio.toDouble()
 
-                val totalDescontado = galon * descuentoGalon
-                val total = (galon * precio) - totalDescontado
-                _uiState.update {
-                    it.copy(
-                        precio = event.precio.toString(),
-                        totalDescontado = totalDescontado.toString(),
-                        total = total.toString(),
-                        errorPrecio = ""
-                    )
+                if(_uiState.value.galones.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty() && event.precio.isNotEmpty()){
+//                    val galon = _uiState?.value?.galones?.toDouble() ?: 0.0
+//                    val descuentoGalon = _uiState?.value?.descuentoGalon?.toDouble() ?: 0.0
+//                    val precio = event.precio.toDouble()
+
+                    val totalDescontado = _uiState.value.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
+                    val total = (_uiState.value.galones.toDouble() * event.precio.toDouble()) - totalDescontado
+
+//                    val totalDescontado = galon * descuentoGalon
+//                    val total = (galon * precio) - totalDescontado
+                    _uiState.update {
+                        it.copy(
+                            precio = event.precio,
+                            totalDescontado = totalDescontado.toString(),
+                            total = total.toString(),
+                            errorPrecio = ""
+                        )
+                    }
+                }
+                else{
+                    _uiState.update {
+                        it.copy(
+                            precio = event.precio,
+                            totalDescontado = "0.0",
+                            total = event.precio,
+                            errorPrecio = ""
+                        )
+                    }
                 }
             }
             is VentaUiEvent.totalDescontadoChanged -> {
