@@ -3,7 +3,9 @@
 package edu.ucne.davidrosario_p1_ap2.presentation.venta
 
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -297,14 +299,20 @@ fun VentaBodyScreen(
                 readOnly = true
             )
 
-            OutlinedButton(
-                onClick = {
-                    onEvent(VentaUiEvent.Save)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ){
+                OutlinedButton(
+                    onClick = {
+                        onEvent(VentaUiEvent.Save)
+                    }
+                ) {
+                    Text(
+                        text = if(ventaId == 0) "Crear Venta" else "Modificar Venta"
+                    )
                 }
-            ) {
-                Text(
-                    text = if(ventaId == 0) "Crear Venta" else "Modificar Venta"
-                )
             }
         }
     }
