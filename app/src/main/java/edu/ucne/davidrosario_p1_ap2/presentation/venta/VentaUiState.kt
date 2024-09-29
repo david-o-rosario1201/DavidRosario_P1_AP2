@@ -15,5 +15,6 @@ data class VentaUiState(
     val errorGalones: String? = "",
     val errorDescuentoGalon: String? = "",
     val errorPrecio: String? = "",
+    val errorTotal: String? = "",
     val success: Boolean = false
 )
