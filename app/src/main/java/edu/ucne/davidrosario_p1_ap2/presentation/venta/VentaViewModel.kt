@@ -67,7 +67,8 @@ class VentaViewModel @Inject constructor(
                             galones = event.galones,
                             totalDescontado = totalDescontado.toString(),
                             total = "0.0",
-                            errorGalones = ""
+                            errorGalones = "",
+                            errorTotal = ""
                         )
                     }
                 }
@@ -77,7 +78,8 @@ class VentaViewModel @Inject constructor(
                             galones = event.galones,
                             totalDescontado = "0.0",
                             total = "0.0",
-                            errorGalones = ""
+                            errorGalones = "",
+                            errorTotal = ""
                         )
                     }
                 }
@@ -118,37 +120,17 @@ class VentaViewModel @Inject constructor(
                 }
             }
             is VentaUiEvent.precioChanged -> {
-//                if(_uiState.value.galones.isNotEmpty() && _uiState.value.precio.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty()){
-//
-//                }
-//                else{
-//                    _uiState.update {
-//                        it.copy(
-//                            precio = event.precio.toString(),
-//                            totalDescontado = "0.0",
-//                            total = "0.0",
-//                            errorPrecio = ""
-//                        )
-//                    }
-//                }
-
-
                 if(_uiState.value.galones.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty() && event.precio.isNotEmpty()){
-//                    val galon = _uiState?.value?.galones?.toDouble() ?: 0.0
-//                    val descuentoGalon = _uiState?.value?.descuentoGalon?.toDouble() ?: 0.0
-//                    val precio = event.precio.toDouble()
-
                     val totalDescontado = _uiState.value.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
                     val total = (_uiState.value.galones.toDouble() * event.precio.toDouble()) - totalDescontado
 
-//                    val totalDescontado = galon * descuentoGalon
-//                    val total = (galon * precio) - totalDescontado
                     _uiState.update {
                         it.copy(
                             precio = event.precio,
                             totalDescontado = totalDescontado.toString(),
                             total = total.toString(),
-                            errorPrecio = ""
+                            errorPrecio = "",
+                            errorTotal = ""
                         )
                     }
                 }
@@ -158,19 +140,20 @@ class VentaViewModel @Inject constructor(
                             precio = event.precio,
                             totalDescontado = "0.0",
                             total = event.precio,
-                            errorPrecio = ""
+                            errorPrecio = "",
+                            errorTotal = ""
                         )
                     }
                 }
             }
             is VentaUiEvent.totalDescontadoChanged -> {
                 _uiState.update {
-                    it.copy(totalDescontado = event.totalDescontado.toString())
+                    it.copy(totalDescontado = event.totalDescontado)
                 }
             }
             is VentaUiEvent.totalChanged -> {
                 _uiState.update {
-                    it.copy(total = event.total.toString())
+                    it.copy(total = event.total)
                 }
             }
             is VentaUiEvent.selectedVenta -> {
@@ -193,19 +176,19 @@ class VentaViewModel @Inject constructor(
             }
             VentaUiEvent.Save -> {
                 viewModelScope.launch {
-                    val cliente = ventaRepository.findCliente(_uiState.value.cliente ?: "")
-                    if(_uiState.value.cliente.isNullOrEmpty()){
+                    val clienteBuscado = ventaRepository.findCliente(_uiState.value.cliente)
+                    if(_uiState.value.cliente.isEmpty()){
                         _uiState.update {
                             it.copy(errorCliente = "Este campo no puede estar vacío")
                         }
                     }
-                    else if(cliente != null){
+                    else if(clienteBuscado != null && _uiState.value.ventaId != clienteBuscado.ventaId){
                         _uiState.update {
                             it.copy(errorCliente = "Ya existe una venta con este cliente")
                         }
                     }
 
-                    if(_uiState.value.galones == null){
+                    if(_uiState.value.galones == ""){
                         _uiState.update {
                             it.copy(errorGalones = "Este campo no puede estar vacío")
                         }
@@ -216,30 +199,42 @@ class VentaViewModel @Inject constructor(
                         }
                     }
 
-                    if(_uiState.value.descuentoGalon == null){
+                    if(_uiState.value.descuentoGalon == ""){
                         _uiState.update {
                             it.copy(errorDescuentoGalon = "Este campo no puede estar vacío")
                         }
                     }
-                    else if(_uiState.value.descuentoGalon.toDouble() < 0.01 || _uiState.value.descuentoGalon.toDouble() > 10000){
+                    else if(_uiState.value.descuentoGalon.toDouble() < 0 || _uiState.value.descuentoGalon.toDouble() > 10000){
                         _uiState.update {
-                            it.copy(errorDescuentoGalon = "El minímo de descuento por galón es 0.01 y el máximo es de 10,000")
+                            it.copy(errorDescuentoGalon = "El minímo de descuento por galón es 0 y el máximo es de 10,000")
                         }
                     }
 
-                    if(_uiState.value.precio == null){
+                    if(_uiState.value.precio == ""){
                         _uiState.update {
                             it.copy(errorPrecio = "Este campo no puede estar vacío")
                         }
                     }
                     else if(_uiState.value.precio.toDouble() < 0.01 || _uiState.value.precio.toDouble() > 10000){
                         _uiState.update {
-                            it.copy(errorPrecio = "El minímo de descuento por galón es 0.01 y el máximo es de 10,000")
+                            it.copy(errorPrecio = "El precio minímo es de 0.01 y el máximo es de 10,000")
+                        }
+                    }
+
+                    if (_uiState.value.total != null && _uiState.value.totalDescontado != null) {
+                        val total = _uiState.value.total.toDoubleOrNull()
+                        val totalDescontado = _uiState.value.totalDescontado.toDoubleOrNull()
+
+                        if (total != null && totalDescontado != null && total <= totalDescontado) {
+                            _uiState.update {
+                                it.copy(errorTotal = "El total no puede ser menor o igual que el total descuento")
+                            }
                         }
                     }
 
                     if(_uiState.value.errorCliente == "" && _uiState.value.errorGalones == ""
-                        && _uiState.value.errorDescuentoGalon == "" && _uiState.value.errorPrecio == ""){
+                        && _uiState.value.errorDescuentoGalon == "" && _uiState.value.errorPrecio == ""
+                        && _uiState.value.errorTotal == ""){
                         ventaRepository.save(_uiState.value.toEntity())
                         _uiState.update {
                             it.copy(success = true)
@@ -258,10 +253,10 @@ class VentaViewModel @Inject constructor(
     fun VentaUiState.toEntity() = VentaEntity(
         ventaId = ventaId,
         cliente = cliente,
-        galones = galones.toDouble(),
-        descuentoGalon = descuentoGalon.toDouble(),
-        precio = precio.toDouble(),
-        totalDescontado = totalDescontado.toDouble(),
-        total = total.toDouble()
+        galones = galones.toDoubleOrNull() ?: 0.0,
+        descuentoGalon = descuentoGalon.toDoubleOrNull() ?: 0.0,
+        precio = precio.toDoubleOrNull() ?: 0.0,
+        totalDescontado = totalDescontado.toDoubleOrNull() ?: 0.0,
+        total = total.toDoubleOrNull() ?: 0.0
     )
 }
