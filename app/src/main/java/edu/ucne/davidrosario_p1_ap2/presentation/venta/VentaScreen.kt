@@ -5,15 +5,21 @@ package edu.ucne.davidrosario_p1_ap2.presentation.venta
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -252,13 +258,15 @@ fun VentaBodyScreen(
                     shape = RoundedCornerShape(10.dp),
                     readOnly = true
                 )
-                uiState.errorTotal?.let {
+                uiState.errorCalculoTotal?.let {
                     Text(
                         text = it,
                         color = Color.Red
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
 
             Row(
                 modifier = Modifier
@@ -267,9 +275,29 @@ fun VentaBodyScreen(
             ){
                 OutlinedButton(
                     onClick = {
+                        onEvent(VentaUiEvent.CalcularTotal)
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = "Calcular Total"
+                    )
+                    Text(
+                        text = "Calcular Total"
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(25.dp))
+
+                OutlinedButton(
+                    onClick = {
                         onEvent(VentaUiEvent.Save)
                     }
                 ) {
+                    Icon(
+                        imageVector = if(ventaId == 0) Icons.Default.Add else Icons.Default.Edit,
+                        contentDescription = ""
+                    )
                     Text(
                         text = if(ventaId == 0) "Crear Venta" else "Modificar Venta"
                     )
