@@ -2,19 +2,24 @@
 
 package edu.ucne.davidrosario_p1_ap2.presentation.venta
 
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,19 +32,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
+import edu.ucne.davidrosario_p1_ap2.presentation.navigation.Screen
+import edu.ucne.davidrosario_p1_ap2.ui.theme.DavidRosario_P1_AP2Theme
 
 @Composable
 fun VentaScreen(
@@ -63,22 +68,11 @@ fun VentaBodyScreen(
     onEvent: (VentaUiEvent) -> Unit,
     goVentaList: () -> Unit
 ){
-    var inputGalones by remember { mutableStateOf("") }
-    var inputDescuentoGalon by remember { mutableStateOf("") }
-    var inputPrecio by remember { mutableStateOf("") }
-
-
     LaunchedEffect(
         key1 = true,
         key2 = uiState.success
     ) {
-//        if(!inputGalones.isNullOrEmpty() && !inputDescuentoGalon.isNullOrEmpty() && !inputPrecio.isNullOrEmpty()){
-//            val totalDescontado = inputGalones.toDouble() * inputDescuentoGalon.toDouble()
-//            onEvent(VentaUiEvent.totalDescontadoChanged(totalDescontado))
-//
-//            val total = (inputGalones.toDouble() * inputPrecio.toDouble()) - totalDescontado
-//            onEvent(VentaUiEvent.totalChanged(total))
-//        }
+        onEvent(VentaUiEvent.selectedVenta(ventaId))
 
         if(uiState.success)
             goVentaList()
@@ -184,26 +178,6 @@ fun VentaBodyScreen(
                     value = uiState.descuentoGalon,
                     onValueChange = {
                         onEvent(VentaUiEvent.descuentoGalonChanged(it))
-//                        if(it.isEmpty()){
-//                            inputDescuentoGalon = ""
-//                            onEvent(VentaUiEvent.galonesChanged(null))
-//                        }
-//                        else if(!it.endsWith(".")){
-//                            inputDescuentoGalon = it
-//                            val descuentoGalon = it.toDoubleOrNull()
-//                            if(descuentoGalon != null){
-//                                onEvent(VentaUiEvent.galonesChanged(descuentoGalon))
-////                                if(!inputGalones.isNullOrEmpty() && !inputDescuentoGalon.isNullOrEmpty() && !inputPrecio.isNullOrEmpty()){
-////                                    val totalDescontado = inputGalones.toDouble() * inputDescuentoGalon.toDouble()
-////                                    onEvent(VentaUiEvent.totalDescontadoChanged(totalDescontado))
-////
-////                                    val total = (inputGalones.toDouble() * inputPrecio.toDouble()) - totalDescontado
-////                                    onEvent(VentaUiEvent.totalChanged(total))
-////                                }
-//                            }
-//                        }
-//                        else
-//                            inputDescuentoGalon = it
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -234,26 +208,6 @@ fun VentaBodyScreen(
                     value = uiState.precio,
                     onValueChange = {
                         onEvent(VentaUiEvent.precioChanged(it))
-//                        if(it.isEmpty()){
-//                            inputPrecio = ""
-//                            onEvent(VentaUiEvent.galonesChanged(null))
-//                        }
-//                        else if(!it.endsWith(".")){
-//                            inputPrecio = it
-//                            val precio = it.toDoubleOrNull()
-//                            if(precio != null){
-//                                onEvent(VentaUiEvent.galonesChanged(precio))
-////                                if(!inputGalones.isNullOrEmpty() && !inputDescuentoGalon.isNullOrEmpty() && !inputPrecio.isNullOrEmpty()){
-////                                    val totalDescontado = inputGalones.toDouble() * inputDescuentoGalon.toDouble()
-////                                    onEvent(VentaUiEvent.totalDescontadoChanged(totalDescontado))
-////
-////                                    val total = (inputGalones.toDouble() * inputPrecio.toDouble()) - totalDescontado
-////                                    onEvent(VentaUiEvent.totalChanged(total))
-////                                }
-//                            }
-//                        }
-//                        else
-//                            inputPrecio = it
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -276,20 +230,7 @@ fun VentaBodyScreen(
                 label = {
                     Text("Total Descontado")
                 },
-                value = uiState.totalDescontado?.toString() ?: "",
-                onValueChange = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp)
-                    .clip(RoundedCornerShape(10.dp)),
-                shape = RoundedCornerShape(10.dp),
-                readOnly = true
-            )
-            OutlinedTextField(
-                label = {
-                    Text("Total")
-                },
-                value = uiState.total?.toString() ?: "",
+                value = uiState.totalDescontado,
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -299,6 +240,34 @@ fun VentaBodyScreen(
                 readOnly = true
             )
 
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                OutlinedTextField(
+                    label = {
+                        Text("Total")
+                    },
+                    value = uiState.total,
+                    onValueChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                        .clip(RoundedCornerShape(10.dp)),
+                    shape = RoundedCornerShape(10.dp),
+                    readOnly = true
+                )
+                uiState.errorCalculoTotal?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -306,14 +275,48 @@ fun VentaBodyScreen(
             ){
                 OutlinedButton(
                     onClick = {
+                        onEvent(VentaUiEvent.CalcularTotal)
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = "Calcular Total"
+                    )
+                    Text(
+                        text = "Calcular Total"
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(25.dp))
+
+                OutlinedButton(
+                    onClick = {
                         onEvent(VentaUiEvent.Save)
                     }
                 ) {
+                    Icon(
+                        imageVector = if(ventaId == 0) Icons.Default.Add else Icons.Default.Edit,
+                        contentDescription = ""
+                    )
                     Text(
                         text = if(ventaId == 0) "Crear Venta" else "Modificar Venta"
                     )
                 }
             }
         }
+    }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+private fun VentaScreenPreview() {
+    DavidRosario_P1_AP2Theme {
+        val navHostController = rememberNavController()
+        VentaScreen(
+            ventaId = 1,
+            goVentaList = {
+                navHostController.navigate(Screen.VentaListScreen)
+            }
+        )
     }
 }

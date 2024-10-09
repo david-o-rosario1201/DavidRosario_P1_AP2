@@ -48,129 +48,44 @@ class VentaViewModel @Inject constructor(
                 }
             }
             is VentaUiEvent.galonesChanged -> {
-                if(_uiState.value.precio.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty() && event.galones.isNotEmpty()){
-                    val totalDescontado = event.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
-                    val total = (event.galones.toDouble() * _uiState.value.precio.toDouble()) - totalDescontado
-                    _uiState.update {
-                        it.copy(
-                            galones = event.galones,
-                            totalDescontado = totalDescontado.toString(),
-                            total = total.toString(),
-                            errorGalones = ""
-                        )
-                    }
-                }
-                else if(_uiState.value.descuentoGalon.isNotEmpty() && event.galones.isNotEmpty()){
-                    val totalDescontado = event.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
-                    _uiState.update {
-                        it.copy(
-                            galones = event.galones,
-                            totalDescontado = totalDescontado.toString(),
-                            total = "0.0",
-                            errorGalones = ""
-                        )
-                    }
-                }
-                else{
-                    _uiState.update {
-                        it.copy(
-                            galones = event.galones,
-                            totalDescontado = "0.0",
-                            total = "0.0",
-                            errorGalones = ""
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        galones = event.galones,
+                        errorGalones = "",
+                        errorCalculoTotal = "",
+                        totalCalculado = false
+                    )
                 }
             }
             is VentaUiEvent.descuentoGalonChanged -> {
-                if(_uiState.value.galones.isNotEmpty() && _uiState.value.precio.isNotEmpty() && event.descuentoGalon.isNotEmpty()){
-                    val totalDescontado = _uiState.value.galones.toDouble() * event.descuentoGalon.toDouble()
-                    val total = (_uiState.value.galones.toDouble() * _uiState.value.precio.toDouble()) - totalDescontado
-                    _uiState.update {
-                        it.copy(
-                            descuentoGalon = event.descuentoGalon,
-                            totalDescontado = totalDescontado.toString(),
-                            total = total.toString(),
-                            errorDescuentoGalon = ""
-                        )
-                    }
-                }
-                else if(_uiState.value.galones.isNotEmpty() && event.descuentoGalon.isNotEmpty()){
-                    val totalDescontado = _uiState.value.galones.toDouble() * event.descuentoGalon.toDouble()
-                    _uiState.update {
-                        it.copy(
-                            descuentoGalon = event.descuentoGalon,
-                            totalDescontado = totalDescontado.toString(),
-                            total = "0.0",
-                            errorDescuentoGalon = ""
-                        )
-                    }
-                }
-                else{
-                    _uiState.update {
-                        it.copy(
-                            descuentoGalon = event.descuentoGalon,
-                            totalDescontado = event.descuentoGalon,
-                            total = "0.0",
-                            errorDescuentoGalon = ""
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        descuentoGalon = event.descuentoGalon,
+                        errorDescuentoGalon = "",
+                        errorPrecio = "",
+                        errorCalculoTotal = "",
+                        totalCalculado = false
+                    )
                 }
             }
             is VentaUiEvent.precioChanged -> {
-//                if(_uiState.value.galones.isNotEmpty() && _uiState.value.precio.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty()){
-//
-//                }
-//                else{
-//                    _uiState.update {
-//                        it.copy(
-//                            precio = event.precio.toString(),
-//                            totalDescontado = "0.0",
-//                            total = "0.0",
-//                            errorPrecio = ""
-//                        )
-//                    }
-//                }
-
-
-                if(_uiState.value.galones.isNotEmpty() && _uiState.value.descuentoGalon.isNotEmpty() && event.precio.isNotEmpty()){
-//                    val galon = _uiState?.value?.galones?.toDouble() ?: 0.0
-//                    val descuentoGalon = _uiState?.value?.descuentoGalon?.toDouble() ?: 0.0
-//                    val precio = event.precio.toDouble()
-
-                    val totalDescontado = _uiState.value.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
-                    val total = (_uiState.value.galones.toDouble() * event.precio.toDouble()) - totalDescontado
-
-//                    val totalDescontado = galon * descuentoGalon
-//                    val total = (galon * precio) - totalDescontado
-                    _uiState.update {
-                        it.copy(
-                            precio = event.precio,
-                            totalDescontado = totalDescontado.toString(),
-                            total = total.toString(),
-                            errorPrecio = ""
-                        )
-                    }
-                }
-                else{
-                    _uiState.update {
-                        it.copy(
-                            precio = event.precio,
-                            totalDescontado = "0.0",
-                            total = event.precio,
-                            errorPrecio = ""
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        precio = event.precio,
+                        errorPrecio = "",
+                        errorCalculoTotal = "",
+                        totalCalculado = false
+                    )
                 }
             }
             is VentaUiEvent.totalDescontadoChanged -> {
                 _uiState.update {
-                    it.copy(totalDescontado = event.totalDescontado.toString())
+                    it.copy(totalDescontado = event.totalDescontado)
                 }
             }
             is VentaUiEvent.totalChanged -> {
                 _uiState.update {
-                    it.copy(total = event.total.toString())
+                    it.copy(total = event.total)
                 }
             }
             is VentaUiEvent.selectedVenta -> {
@@ -193,53 +108,29 @@ class VentaViewModel @Inject constructor(
             }
             VentaUiEvent.Save -> {
                 viewModelScope.launch {
-                    val cliente = ventaRepository.findCliente(_uiState.value.cliente ?: "")
-                    if(_uiState.value.cliente.isNullOrEmpty()){
+                    val clienteBuscado = ventaRepository.findCliente(_uiState.value.cliente)
+
+                    if(_uiState.value.cliente.isEmpty()){
                         _uiState.update {
                             it.copy(errorCliente = "Este campo no puede estar vacío")
                         }
                     }
-                    else if(cliente != null){
+                    else if(clienteBuscado != null && _uiState.value.ventaId != clienteBuscado.ventaId){
                         _uiState.update {
                             it.copy(errorCliente = "Ya existe una venta con este cliente")
                         }
                     }
 
-                    if(_uiState.value.galones == null){
+                    if(!_uiState.value.totalCalculado){
                         _uiState.update {
-                            it.copy(errorGalones = "Este campo no puede estar vacío")
-                        }
-                    }
-                    else if(_uiState.value.galones.toDouble() < 0.5 || _uiState.value.galones.toDouble() > 1000){
-                        _uiState.update {
-                            it.copy(errorGalones = "El minímo de galones es 0.5 y el máximo es de 1,000")
-                        }
-                    }
-
-                    if(_uiState.value.descuentoGalon == null){
-                        _uiState.update {
-                            it.copy(errorDescuentoGalon = "Este campo no puede estar vacío")
-                        }
-                    }
-                    else if(_uiState.value.descuentoGalon.toDouble() < 0.01 || _uiState.value.descuentoGalon.toDouble() > 10000){
-                        _uiState.update {
-                            it.copy(errorDescuentoGalon = "El minímo de descuento por galón es 0.01 y el máximo es de 10,000")
-                        }
-                    }
-
-                    if(_uiState.value.precio == null){
-                        _uiState.update {
-                            it.copy(errorPrecio = "Este campo no puede estar vacío")
-                        }
-                    }
-                    else if(_uiState.value.precio.toDouble() < 0.01 || _uiState.value.precio.toDouble() > 10000){
-                        _uiState.update {
-                            it.copy(errorPrecio = "El minímo de descuento por galón es 0.01 y el máximo es de 10,000")
+                            it.copy(errorCalculoTotal = "Aún no ha calculado el total. Asegúrese de pulsar el botón 'Calcular Total'")
                         }
                     }
 
                     if(_uiState.value.errorCliente == "" && _uiState.value.errorGalones == ""
-                        && _uiState.value.errorDescuentoGalon == "" && _uiState.value.errorPrecio == ""){
+                        && _uiState.value.errorDescuentoGalon == "" && _uiState.value.errorPrecio == ""
+                        && _uiState.value.errorCalculoTotal == "" && _uiState.value.totalCalculado){
+
                         ventaRepository.save(_uiState.value.toEntity())
                         _uiState.update {
                             it.copy(success = true)
@@ -252,16 +143,73 @@ class VentaViewModel @Inject constructor(
                     ventaRepository.delete(_uiState.value.toEntity())
                 }
             }
+
+            VentaUiEvent.CalcularTotal -> {
+                if(_uiState.value.galones.isEmpty()){
+                    _uiState.update {
+                        it.copy(errorGalones = "Este campo no puede estar vacío")
+                    }
+                }
+                else if(_uiState.value.galones.toDouble() < 0.5 || _uiState.value.galones.toDouble() > 1000){
+                    _uiState.update {
+                        it.copy(errorGalones = "El minímo de galones es 0.5 y el máximo es de 1,000")
+                    }
+                }
+
+                if(_uiState.value.descuentoGalon.isEmpty()){
+                    _uiState.update {
+                        it.copy(errorDescuentoGalon = "Este campo no puede estar vacío")
+                    }
+                }
+                else if(_uiState.value.descuentoGalon.toDouble() < 0 || _uiState.value.descuentoGalon.toDouble() > 10000){
+                    _uiState.update {
+                        it.copy(errorDescuentoGalon = "El minímo de descuento por galón es 0 y el máximo es de 10,000")
+                    }
+                }
+
+                if(_uiState.value.precio.isEmpty()){
+                    _uiState.update {
+                        it.copy(errorPrecio = "Este campo no puede estar vacío")
+                    }
+                }
+                else if(_uiState.value.precio.toDouble() < 0.01 || _uiState.value.precio.toDouble() > 10000){
+                    _uiState.update {
+                        it.copy(errorPrecio = "El precio minímo es de 0.01 y el máximo es de 10,000")
+                    }
+                }
+
+                else if (_uiState.value.precio.toDouble()  <= _uiState.value.descuentoGalon.toDouble()) {
+                    _uiState.update {
+                        it.copy(errorPrecio = "El precio no puede ser menor o igual que el descuento")
+                    }
+                }
+
+                if(_uiState.value.errorGalones == "" && _uiState.value.errorDescuentoGalon == ""
+                    && _uiState.value.errorPrecio == ""){
+
+                    val totalDescontado = _uiState.value.galones.toDouble() * _uiState.value.descuentoGalon.toDouble()
+                    val total = (_uiState.value.galones.toDouble() * _uiState.value.precio.toDouble()) - totalDescontado
+
+                    _uiState.update {
+                        it.copy(
+                            totalDescontado = totalDescontado.toString(),
+                            total = total.toString(),
+                            totalCalculado = true,
+                            errorCalculoTotal = ""
+                        )
+                    }
+                }
+            }
         }
     }
 
     fun VentaUiState.toEntity() = VentaEntity(
         ventaId = ventaId,
         cliente = cliente,
-        galones = galones.toDouble(),
-        descuentoGalon = descuentoGalon.toDouble(),
-        precio = precio.toDouble(),
-        totalDescontado = totalDescontado.toDouble(),
-        total = total.toDouble()
+        galones = galones.toDoubleOrNull() ?: 0.0,
+        descuentoGalon = descuentoGalon.toDoubleOrNull() ?: 0.0,
+        precio = precio.toDoubleOrNull() ?: 0.0,
+        totalDescontado = totalDescontado.toDoubleOrNull() ?: 0.0,
+        total = total.toDoubleOrNull() ?: 0.0
     )
 }
