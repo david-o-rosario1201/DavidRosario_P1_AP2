@@ -11,4 +11,5 @@ sealed interface VentaUiEvent {
     data class selectedVenta(val ventaId: Int): VentaUiEvent
     data object Save: VentaUiEvent
     data object Delete: VentaUiEvent
+    data object CalcularTotal: VentaUiEvent
 }
